@@ -1,4 +1,4 @@
 language: java
 jdk: oraclejdk8
-before_script: mvn versions:set
+install: mvn versions:set
 script: mvn deploy
