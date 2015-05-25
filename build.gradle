@@ -1,0 +1,63 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url 'https://files.boxfuse.com' }
+    }
+    dependencies {
+        classpath "com.boxfuse.client:boxfuse-gradle-plugin:1.6.1.619"
+    }
+}
+
+group = 'dwunikernel'
+version = '0-SNAPSHOT'
+
+apply plugin: 'boxfuse'
+apply plugin: 'java'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile 'io.dropwizard:dropwizard-core:0.8.1'
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.apache.httpcomponents:fluent-hc:4.3.6'
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": "dwunikernel.DwUnikernelApplication"
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+
+//Run deploy & run integration tests in test environment
+boxfuse {
+    env='test'
+}
+task boxfuseRunTest( type: com.boxfuse.client.gradle.task.RunTask )
+task boxfuseKillTest( type: com.boxfuse.client.gradle.task.KillTask )
+task testConfig (dependsOn: boxfuseRunTest) << {
+    project.tasks.test.systemProperty 'instanceUrl', boxfuse.instancesResult[0].url
+}
+test.dependsOn(testConfig)
+test.finalizedBy(boxfuseKillTest)
+
+
+//Deploy with zero-downtime on prod environment
+extensions.create('boxfuseProd', com.boxfuse.client.gradle.BoxfuseExtension)
+boxfuseProd {
+    env='prod'
+}
+task boxfuseProdConfig (dependsOn: boxfuseKillTest) << {
+    project.tasks.boxfuseRunProd.extension = boxfuseProd
+    boxfuseProd.image=boxfuse.image
+}
+task boxfuseRunProd( type: com.boxfuse.client.gradle.task.RunTask, dependsOn: boxfuseProdConfig )
+check.dependsOn(boxfuseRunProd)

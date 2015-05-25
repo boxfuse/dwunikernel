@@ -163,7 +163,7 @@
             <plugin>
                 <groupId>com.boxfuse.client</groupId>
                 <artifactId>boxfuse-maven-plugin</artifactId>
-                <version>1.6.0.613</version>
+                <version>1.6.1.619</version>
                 <executions>
                     <execution>
                         <id>fuse-image</id>
