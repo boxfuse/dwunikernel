@@ -2,7 +2,7 @@ buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
-        maven { url 'https://files.boxfuse.com' }
+        maven { url 'http://files.boxfuse.com' } //https is disabled until https://issues.gradle.org/browse/GRADLE-3250 is fixed
     }
     dependencies {
         classpath "com.boxfuse.client:boxfuse-gradle-plugin:1.6.1.619"
